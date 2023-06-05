@@ -4,7 +4,7 @@ defmodule EntityResolution do
   alias EntityResolution.Algorithms.WeightedLeastConnections
 
   def run(file_path, chunk_sizes) do
-    env = Application.fetch_env!(:load_balancer, :env)
+    env = Application.fetch_env!(:entity_resolution, :env)
 
     file_path
     |> File.stream!()
@@ -20,11 +20,12 @@ defmodule EntityResolution do
               EntityResolution.Worker.resolve_entities(chunk)
           end
         end)
+        |> Task.await(:infinity)
       end,
-      max_concurrency: max_concurrency(:env)
+      max_concurrency: max_concurrency(env),
+      timeout: :infinity
     )
-    |> Enum.to_list()
-    |> Task.await_many(:infinity)
+    |> Enum.map(fn {:ok, result} -> result end)
     |> List.flatten()
   end
 
@@ -91,7 +92,7 @@ defmodule EntityResolution do
   end
 
   defp algorithm do
-    Application.fetch_env!(:load_balancer, :algorithm)
+    Application.fetch_env!(:entity_resolution, :algorithm)
   end
 
   defp call_remote_node(node, chunk) do
@@ -105,7 +106,7 @@ defmodule EntityResolution do
   end
 
   defp max_concurrency(:prod) do
-    :load_balancer
+    :entity_resolution
     |> Application.fetch_env!(:workers)
     |> Enum.map(fn {_k, v} -> v end)
     |> Enum.sum()

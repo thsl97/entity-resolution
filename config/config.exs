@@ -53,7 +53,7 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :load_balancer,
+config :entity_resolution,
   workers: %{
     :"worker@worker-1" => 1,
     :"worker@worker-2" => 1,

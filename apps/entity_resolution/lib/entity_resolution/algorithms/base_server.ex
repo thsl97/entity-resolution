@@ -12,7 +12,7 @@ defmodule EntityResolution.Algorithms.BaseServer do
       end
 
       defp servers do
-        :load_balancer
+        :entity_resolution
         |> Application.fetch_env!(:workers)
         |> Enum.map(fn {k, v} -> %{name: k, weight: v} end)
       end
