@@ -15,6 +15,12 @@ defmodule EntityResolution.Umbrella.MixProject do
             entity_resolution: :permanent
           ],
           cookie: "some_cookie"
+        ],
+        worker: [
+          applications: [
+            entity_resolution: :permanent
+          ],
+          cookie: "some_cookie"
         ]
       ]
     ]
