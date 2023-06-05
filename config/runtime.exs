@@ -12,12 +12,7 @@ if config_env() == :prod do
   # want to use a different value for prod and you most likely don't want
   # to check this value into version control, so we use an environment
   # variable instead.
-  secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
-      raise """
-      environment variable SECRET_KEY_BASE is missing.
-      You can generate one by calling: mix phx.gen.secret
-      """
+  secret_key_base = "0z72ejm2ckIfVRqzS1l6e8qM4y2jj3EfOoP3gnS0YAzeApeRbHqPdGisF6tw4TTF"
 
   config :entity_resolution_web, EntityResolutionWeb.Endpoint,
     http: [
@@ -33,7 +28,7 @@ if config_env() == :prod do
   # If you are doing OTP releases, you need to instruct Phoenix
   # to start each relevant endpoint:
   #
-  #     config :entity_resolution_web, EntityResolutionWeb.Endpoint, server: true
+  config :entity_resolution_web, EntityResolutionWeb.Endpoint, server: true
   #
   # Then you can assemble a release by calling `mix release`.
   # See `mix help release` for more information.

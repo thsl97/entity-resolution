@@ -7,7 +7,16 @@ defmodule EntityResolution.Umbrella.MixProject do
       version: "0.1.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      releases: [
+        web: [
+          applications: [
+            entity_resolution_web: :permanent,
+            entity_resolution: :permanent
+          ],
+          cookie: "some_cookie"
+        ]
+      ]
     ]
   end
 
