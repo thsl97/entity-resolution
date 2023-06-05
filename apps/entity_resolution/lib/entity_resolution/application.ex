@@ -7,13 +7,8 @@ defmodule EntityResolution.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Start the PubSub system
-      {Phoenix.PubSub, name: EntityResolution.PubSub}
-      # Start a worker by calling: EntityResolution.Worker.start_link(arg)
-      # {EntityResolution.Worker, arg}
-    ]
+    Node.connect(:"web@web-server")
 
-    Supervisor.start_link(children, strategy: :one_for_one, name: EntityResolution.Supervisor)
+    Supervisor.start_link([], strategy: :one_for_one, name: LoadBalancer.Supervisor)
   end
 end

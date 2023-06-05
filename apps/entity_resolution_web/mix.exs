@@ -44,7 +44,8 @@ defmodule EntityResolutionWeb.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:entity_resolution, in_umbrella: true},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      {:telemetry, "~> 1.0"}
     ]
   end
 

@@ -36,7 +36,7 @@ defmodule EntityResolution.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix_pubsub, "~> 2.1"}
+      {:telemetry, "~> 1.0"}
     ]
   end
 

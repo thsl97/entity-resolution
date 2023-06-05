@@ -91,4 +91,6 @@ COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/web ./
 
 USER nobody
 
+COPY produtos.txt ./produtos.txt
+
 ENTRYPOINT ["/app/bin/web"]

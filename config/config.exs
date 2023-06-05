@@ -14,6 +14,7 @@ config :entity_resolution_web,
 
 # Configures the endpoint
 config :entity_resolution_web, EntityResolutionWeb.Endpoint,
+  check_origin: false,
   url: [host: "localhost"],
   render_errors: [
     formats: [json: EntityResolutionWeb.ErrorJSON],
@@ -51,6 +52,15 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :load_balancer,
+  workers: %{
+    :"worker@worker-1" => 1,
+    :"worker@worker-2" => 1,
+    :"worker@worker-3" => 1
+  },
+  algorithm: EntityResolution.Algorithms.RoundRobin,
+  env: config_env()
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
