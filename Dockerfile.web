@@ -62,6 +62,7 @@ RUN mix compile
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 
+COPY rel rel
 COPY apps/entity_resolution_web/rel ./apps/entity_resolution_web/rel
 RUN mix release web
 
