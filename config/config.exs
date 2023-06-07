@@ -55,9 +55,9 @@ config :phoenix, :json_library, Jason
 
 config :entity_resolution,
   workers: %{
-    :"worker@worker-1" => 1,
+    :"worker@worker-1" => 3,
     :"worker@worker-2" => 1,
-    :"worker@worker-3" => 1
+    :"worker@worker-3" => 2
   },
   algorithm: EntityResolution.Algorithms.RoundRobin,
   env: config_env()
