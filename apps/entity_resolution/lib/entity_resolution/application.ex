@@ -7,8 +7,6 @@ defmodule EntityResolution.Application do
 
   @impl true
   def start(_type, _args) do
-    Node.connect(:"web@web-server")
-
     Supervisor.start_link([], strategy: :one_for_one, name: LoadBalancer.Supervisor)
   end
 end

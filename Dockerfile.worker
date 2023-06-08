@@ -36,7 +36,7 @@ ENV MIX_ENV="prod"
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
-COPY apps/entity_resolution/mix.exs ./apps/entity_resolution/mix.exs
+COPY apps/entity_resolution_worker/mix.exs ./apps/entity_resolution_worker/mix.exs
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
 
@@ -46,7 +46,7 @@ RUN mkdir config
 COPY config/config.exs config/${MIX_ENV}.exs config/
 RUN mix deps.compile
 
-COPY apps/entity_resolution ./apps/entity_resolution
+COPY apps/entity_resolution_worker ./apps/entity_resolution_worker
 
 # Compile the release
 RUN mix compile
