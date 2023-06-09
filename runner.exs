@@ -12,14 +12,25 @@ defmodule DecreasingList do
   end
 end
 
+results = [best_case: EntityResolution.run("/app/produtos.txt", 1000)]
+
+:entity_resolution |> Application.fetch_env!(:algorithm) |> GenServer.stop()
+
 results =
-  Enum.map([{5_000, 10.0}, {10_000, 10.0}, {10_000, 50.0}], fn {block, percentage} ->
-    block
-    |> DecreasingList.generate_decreasing_list(percentage)
-    |> Enum.drop(-1)
-    |> then(fn list ->
-      result = EntityResolution.run("/app/produtos.txt", list)
-      :entity_resolution |> Application.fetch_env!(:algorithm) |> GenServer.stop()
-      result
-    end)
-  end)
+  Enum.reduce(
+    [{:median_case_1, 5_000, 10.0}, {:median_case_2, 10_000, 10.0}, {:worst_case, 10_000, 50.0}],
+    results,
+    fn {case_name, block, percentage}, acc ->
+      result =
+        block
+        |> DecreasingList.generate_decreasing_list(percentage)
+        |> Enum.drop(-1)
+        |> then(fn list ->
+          result = EntityResolution.run("/app/produtos.txt", list)
+          :entity_resolution |> Application.fetch_env!(:algorithm) |> GenServer.stop()
+          result
+        end)
+
+      acc ++ [{case_name, result}]
+    end
+  )
