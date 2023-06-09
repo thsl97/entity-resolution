@@ -25,7 +25,7 @@ defmodule EntityResolutionWorker do
 
   @impl true
   def handle_call({:resolve_entities, chunk}, _from, state) do
-    start = System.monotonic_time(:second)
+    start = System.monotonic_time(:millisecond)
 
     result =
       Enum.reduce(chunk, [], fn elem, acc ->
@@ -36,7 +36,7 @@ defmodule EntityResolutionWorker do
         end
       end)
 
-    {:reply, {result, System.monotonic_time(:second) - start}, state}
+    {:reply, {result, System.monotonic_time(:millisecond) - start}, state}
   end
 
   defp any_duplicates?(elem, list) do
