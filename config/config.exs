@@ -55,11 +55,11 @@ config :phoenix, :json_library, Jason
 
 config :entity_resolution,
   workers: %{
-    :"worker@worker-1" => 4,
-    :"worker@worker-2" => 3,
-    :"worker@worker-3" => 2
+    :"worker@worker-1" => 1,
+    :"worker@worker-2" => 1,
+    :"worker@worker-3" => 1
   },
-  algorithm: EntityResolution.Algorithms.WeightedRoundRobin,
+  algorithm: EntityResolution.Algorithms.RoundRobin,
   env: config_env()
 
 # Import environment specific config. This must remain at the bottom
