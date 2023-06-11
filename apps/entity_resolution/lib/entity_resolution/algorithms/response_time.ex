@@ -7,27 +7,43 @@ defmodule EntityResolution.Algorithms.ResponseTime do
 
   @impl true
   def init(servers) do
-    servers |> Enum.map(&Map.put(&1, :response_time, 0)) |> then(&{:ok, &1})
+    servers
+    |> Enum.map(&Map.merge(&1, %{active_connections: 0, response_time: 0}))
+    |> then(&{:ok, &1})
   end
 
   @impl true
   def handle_call(:get_next_server, _from, servers) do
-    %{name: server_name} =
-      Enum.min_by(servers, fn %{response_time: response_time} -> response_time end)
+    %{active_connections: active_connections_to_filter} =
+      Enum.min_by(servers, & &1.active_connections)
 
-    {:reply, server_name, servers}
+    {%{name: server_name} = server, index} =
+      servers
+      |> Enum.with_index()
+      |> Enum.filter(fn {%{active_connections: active_connections}, _} ->
+        active_connections == active_connections_to_filter
+      end)
+      |> Enum.min_by(fn {%{response_time: response_time}, _} -> response_time end)
+
+    new_state =
+      server
+      |> Map.update!(:active_connections, &(&1 + 1))
+      |> then(&List.replace_at(servers, index, &1))
+
+    {:reply, server_name, new_state}
   end
 
   @impl true
   def handle_cast({:update_response_time, server_name, new_response_time}, servers) do
-    {%{response_time: response_time} = server, index} =
+    {server, index} =
       servers
       |> Enum.with_index()
       |> Enum.find(fn {%{name: name}, _} -> name == server_name end)
 
     new_state =
       server
-      |> Map.put(:response_time, (response_time + new_response_time) / 2)
+      |> Map.update!(:response_time, &((&1 + new_response_time) / 2))
+      |> Map.update!(:active_connections, &(&1 - 1))
       |> then(&List.replace_at(servers, index, &1))
 
     {:noreply, new_state}
