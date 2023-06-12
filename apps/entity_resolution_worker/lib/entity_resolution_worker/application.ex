@@ -7,8 +7,6 @@ defmodule EntityResolutionWorker.Application do
 
   @impl true
   def start(_type, _args) do
-    Node.connect(:"web@web-server")
-
     children = [
       :poolboy.child_spec(:worker, poolboy_config())
     ]

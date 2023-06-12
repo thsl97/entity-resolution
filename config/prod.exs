@@ -12,5 +12,14 @@ config :entity_resolution_web, EntityResolutionWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :kernel,
+  sync_nodes_optional: [
+    :"web@web-server",
+    :"worker@worker-1",
+    :"worker@worker-2",
+    :"worker@worker-3"
+  ],
+  sync_nodes_timeout: :infinity
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
