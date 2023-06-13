@@ -59,7 +59,7 @@ config :entity_resolution,
     :"worker@worker-2" => 3,
     :"worker@worker-3" => 2
   },
-  algorithm: EntityResolution.Algorithms.WeightedLeastConnections,
+  algorithm: EntityResolution.Algorithms.ResponseTime,
   env: config_env()
 
 # Import environment specific config. This must remain at the bottom
