@@ -59,7 +59,7 @@ config :entity_resolution,
     :"worker@worker-2" => 1,
     :"worker@worker-3" => 1
   },
-  algorithm: EntityResolution.Algorithms.ResponseTime,
+  algorithm: EntityResolution.Algorithms.RoundRobin,
   env: config_env()
 
 # Import environment specific config. This must remain at the bottom

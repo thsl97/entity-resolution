@@ -1,30 +1,5 @@
 defmodule EntityResolutionWorker do
-  use GenServer
-
   def resolve_entities(chunk) do
-    Task.async(fn ->
-      :poolboy.transaction(
-        :worker,
-        fn pid ->
-          GenServer.call(pid, {:resolve_entities, chunk}, :infinity)
-        end,
-        :infinity
-      )
-    end)
-    |> Task.await(:infinity)
-  end
-
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, nil)
-  end
-
-  @impl true
-  def init(_) do
-    {:ok, nil}
-  end
-
-  @impl true
-  def handle_call({:resolve_entities, chunk}, _from, state) do
     start = System.monotonic_time(:millisecond)
 
     result =
@@ -36,7 +11,7 @@ defmodule EntityResolutionWorker do
         end
       end)
 
-    {:reply, {result, System.monotonic_time(:millisecond) - start}, state}
+    {result, System.monotonic_time(:millisecond) - start}
   end
 
   defp any_duplicates?(elem, list) do

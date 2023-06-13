@@ -10,65 +10,62 @@ defmodule EntityResolution do
       file_path
       |> File.stream!()
       |> chunk(chunk_sizes)
+      |> Enum.to_list()
+
+    tasks =
+      chunks
+      |> Task.async_stream(
+        fn chunk ->
+          algorithm = Application.fetch_env!(:entity_resolution, :algorithm)
+
+          node = algorithm.get_next_server()
+          chunk_size = length(chunk)
+
+          :telemetry.execute([:router], %{chunk_size: chunk_size, total_requests: 1}, %{
+            node: node
+          })
+
+          {result, time} =
+            case algorithm do
+              ResponseTime ->
+                {_, time} =
+                  result =
+                  :rpc.call(node, EntityResolutionWorker, :resolve_entities, [chunk], :infinity)
+
+                ResponseTime.update_response_time(node, time)
+                result
+
+              module when module in [LeastConnections, WeightedLeastConnections] ->
+                result =
+                  :rpc.call(node, EntityResolutionWorker, :resolve_entities, [chunk], :infinity)
+
+                module.free_connection(node)
+                result
+
+              _ ->
+                result =
+                  :rpc.call(node, EntityResolutionWorker, :resolve_entities, [chunk], :infinity)
+
+                result
+            end
+
+          Agent.update(agent, fn state ->
+            state
+            |> update_in([node, :execution_times], fn list -> [time] ++ list end)
+            |> update_in([node, :chunk_sizes], fn list -> [chunk_size] ++ list end)
+            |> update_in([node, :total_blocks], &(&1 + 1))
+          end)
+
+          :telemetry.execute([:router], %{execution_time: time}, %{node: node})
+          result
+        end,
+        max_concurrency: Enum.count(chunks),
+        timeout: :infinity
+      )
 
     start_time = System.monotonic_time(:millisecond)
 
-    result =
-      chunks
-      |> Task.async_stream(
-        fn
-          chunk when length(chunk) > 1 ->
-            algorithm = Application.fetch_env!(:entity_resolution, :algorithm)
-
-            node = algorithm.get_next_server()
-            chunk_size = length(chunk)
-
-            :telemetry.execute([:router], %{chunk_size: chunk_size, total_requests: 1}, %{
-              node: node
-            })
-
-            {result, time} =
-              case algorithm do
-                ResponseTime ->
-                  {_, time} =
-                    result =
-                    :rpc.call(node, EntityResolutionWorker, :resolve_entities, [chunk], :infinity)
-
-                  ResponseTime.update_response_time(node, time)
-                  result
-
-                module when module in [LeastConnections, WeightedLeastConnections] ->
-                  result =
-                    :rpc.call(node, EntityResolutionWorker, :resolve_entities, [chunk], :infinity)
-
-                  module.free_connection(node)
-                  result
-
-                _ ->
-                  result =
-                    :rpc.call(node, EntityResolutionWorker, :resolve_entities, [chunk], :infinity)
-
-                  result
-              end
-
-            Agent.update(agent, fn state ->
-              state
-              |> update_in([node, :execution_times], fn list -> [time] ++ list end)
-              |> update_in([node, :chunk_sizes], fn list -> [chunk_size] ++ list end)
-              |> update_in([node, :total_blocks], &(&1 + 1))
-            end)
-
-            :telemetry.execute([:router], %{execution_time: time}, %{node: node})
-            result
-
-          chunk ->
-            chunk
-        end,
-        max_concurrency: max_concurrency(),
-        timeout: :infinity
-      )
-      |> Enum.map(fn {:ok, result} -> result end)
-      |> List.flatten()
+    result = tasks |> Enum.map(fn {:ok, task} -> task end) |> List.flatten()
 
     execution_time = System.monotonic_time(:millisecond) - start_time
 
@@ -99,13 +96,6 @@ defmodule EntityResolution do
 
   defp chunk(stream, chunk_size) do
     Stream.chunk_every(stream, chunk_size)
-  end
-
-  defp max_concurrency do
-    :entity_resolution
-    |> Application.fetch_env!(:workers)
-    |> Enum.map(fn {_, v} -> v end)
-    |> Enum.sum()
   end
 
   defp start_agent do

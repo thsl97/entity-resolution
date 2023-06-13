@@ -8,7 +8,7 @@ defmodule EntityResolutionWorker.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      :poolboy.child_spec(:worker, poolboy_config())
+      # :poolboy.child_spec(:worker, poolboy_config())
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -21,11 +21,7 @@ defmodule EntityResolutionWorker.Application do
     [
       name: {:local, :worker},
       worker_module: EntityResolutionWorker,
-      size:
-        :entity_resolution
-        |> Application.fetch_env!(:workers)
-        |> Enum.find(fn {worker, _} -> worker == Node.self() end)
-        |> elem(1),
+      size: 1,
       max_overflow: 0
     ]
   end
